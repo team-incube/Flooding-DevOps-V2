@@ -11,7 +11,7 @@ spec:
 
   source:
     repoURL: https://github.com/team-incube/Flooding-DevOps-V2
-    targetRevision: master
+    targetRevision: main
     path: helm/flooding-server
     helm:
       valueFiles:
