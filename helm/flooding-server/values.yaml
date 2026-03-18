@@ -16,7 +16,7 @@ service:
   port: 8080
 
 ingress:
-  host: flooding.gsmsv.local
+  host: gsmsv-1.yujun.kr
 
 resources:
   requests:
