@@ -3,7 +3,7 @@
 
 image:
   repository: gsmsv-1.yujun.kr:28104/flooding/flooding-server-v2
-  tag: latest        # ← CD pipeline overwrites this on every master push
+  tag: "master-8f720f0"
   pullPolicy: Always
 
 imagePullSecrets:
