@@ -36,17 +36,13 @@ env:
   SPRING_PROFILES_ACTIVE: prod
 
 livenessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
+  port: 8080
   initialDelaySeconds: 60
   periodSeconds: 15
   failureThreshold: 3
 
 readinessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
+  port: 8080
   initialDelaySeconds: 30
   periodSeconds: 10
   failureThreshold: 3
