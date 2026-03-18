@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "flooding-server.fullname" . }}
+  labels:
+    {{- include "flooding-server.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ .Values.ingress.host }}`)
+      kind: Rule
+      services:
+        - name: {{ include "flooding-server.fullname" . }}
+          port: {{ .Values.service.port }}
+  tls:
+    certResolver: letsencrypt

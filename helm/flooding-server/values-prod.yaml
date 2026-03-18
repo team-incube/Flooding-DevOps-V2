@@ -1,0 +1,19 @@
+# Production overrides
+replicaCount: 3
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "768Mi"
+  limits:
+    cpu: "2000m"
+    memory: "2Gi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+
+env:
+  SPRING_PROFILES_ACTIVE: prod

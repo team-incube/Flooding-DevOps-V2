@@ -1,0 +1,13 @@
+apiVersion: v2
+name: flooding-server
+description: Flooding-Server-V2 — School Integrated Management Service
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - flooding
+  - school
+  - kotlin
+  - spring-boot
+maintainers:
+  - name: team-incube

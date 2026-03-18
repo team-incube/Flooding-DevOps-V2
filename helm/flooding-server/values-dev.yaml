@@ -1,0 +1,16 @@
+# Develop / Staging overrides
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: false
+
+env:
+  SPRING_PROFILES_ACTIVE: dev
