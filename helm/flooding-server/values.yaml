@@ -37,7 +37,7 @@ env:
 
 livenessProbe:
   httpGet:
-    path: /actuator/health/liveness
+    path: /actuator/health
     port: 8080
   initialDelaySeconds: 60
   periodSeconds: 15
@@ -45,7 +45,7 @@ livenessProbe:
 
 readinessProbe:
   httpGet:
-    path: /actuator/health/readiness
+    path: /actuator/health
     port: 8080
   initialDelaySeconds: 30
   periodSeconds: 10
