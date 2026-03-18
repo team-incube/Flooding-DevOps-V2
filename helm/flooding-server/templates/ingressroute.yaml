@@ -6,12 +6,10 @@ metadata:
     {{- include "flooding-server.labels" . | nindent 4 }}
 spec:
   entryPoints:
-    - websecure
+    - web
   routes:
     - match: Host(`{{ .Values.ingress.host }}`)
       kind: Rule
       services:
         - name: {{ include "flooding-server.fullname" . }}
           port: {{ .Values.service.port }}
-  tls:
-    certResolver: letsencrypt
