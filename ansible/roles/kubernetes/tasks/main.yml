@@ -1,0 +1,116 @@
+---
+# Role: kubernetes
+# Layer 1 — Applied to ALL nodes
+# Purpose: Install kubeadm, kubelet, kubectl v1.29. Init control-plane, join workers.
+
+# ── Package installation (all nodes) ────────────────────────────────────────
+
+- name: "kubernetes | Create apt keyring directory"
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: "kubernetes | Add Kubernetes apt GPG key"
+  ansible.builtin.shell:
+    cmd: >
+      curl -fsSL https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/Release.key
+      | gpg --dearmor -o {{ k8s_apt_keyring_path }}
+    creates: "{{ k8s_apt_keyring_path }}"
+
+- name: "kubernetes | Add Kubernetes apt repository"
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by={{ k8s_apt_keyring_path }}]
+      https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/ /
+    filename: kubernetes
+    state: present
+
+- name: "kubernetes | Install kubeadm, kubelet, kubectl"
+  ansible.builtin.apt:
+    name:
+      - "kubelet"
+      - "kubeadm"
+      - "kubectl"
+    state: present
+    update_cache: true
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: "kubernetes | Hold kubeadm, kubelet, kubectl at current version"
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: "kubernetes | Enable and start kubelet"
+  ansible.builtin.systemd:
+    name: kubelet
+    enabled: true
+    state: started
+
+# ── Control-plane init ───────────────────────────────────────────────────────
+
+- name: "kubernetes | Check if cluster is already initialized"
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubeadm_admin_conf
+  when: inventory_hostname in groups['control_plane']
+
+- name: "kubernetes | kubeadm init (control-plane)"
+  ansible.builtin.command: >
+    kubeadm init
+    --pod-network-cidr=10.244.0.0/16
+    --apiserver-advertise-address={{ private_ip }}
+    --skip-phases=addon/kube-proxy
+  when:
+    - inventory_hostname in groups['control_plane']
+    - not kubeadm_admin_conf.stat.exists
+  register: kubeadm_init_output
+
+- name: "kubernetes | Create .kube directory for ubuntu user"
+  ansible.builtin.file:
+    path: /home/ubuntu/.kube
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+  when: inventory_hostname in groups['control_plane']
+
+- name: "kubernetes | Copy admin.conf to ubuntu user"
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: true
+    owner: ubuntu
+    group: ubuntu
+    mode: "0600"
+  when: inventory_hostname in groups['control_plane']
+
+- name: "kubernetes | Generate join command"
+  ansible.builtin.command: kubeadm token create --print-join-command
+  register: kubeadm_join_command
+  when: inventory_hostname in groups['control_plane']
+  changed_when: false
+
+- name: "kubernetes | Store join command as fact"
+  ansible.builtin.set_fact:
+    kubeadm_join_cmd: "{{ kubeadm_join_command.stdout }}"
+  when: inventory_hostname in groups['control_plane']
+
+# ── Worker join ──────────────────────────────────────────────────────────────
+
+- name: "kubernetes | Check if node is already joined"
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf
+  when: inventory_hostname in groups['workers'] or inventory_hostname in groups['monitoring']
+
+- name: "kubernetes | Join worker nodes to cluster"
+  ansible.builtin.command: >
+    {{ hostvars[groups['control_plane'][0]]['kubeadm_join_cmd'] }}
+  when:
+    - inventory_hostname in groups['workers'] or inventory_hostname in groups['monitoring']
+    - not kubelet_conf.stat.exists

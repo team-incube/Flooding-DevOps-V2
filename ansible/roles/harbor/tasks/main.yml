@@ -1,0 +1,51 @@
+# Harbor — private container registry
+- name: "harbor | Add Harbor Helm repo"
+  ansible.builtin.command: helm repo add harbor https://helm.goharbor.io
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "harbor | Update Helm repos"
+  ansible.builtin.command: helm repo update
+  changed_when: false
+
+- name: "harbor | Create namespace"
+  ansible.builtin.shell: kubectl create namespace harbor --dry-run=client -o yaml | kubectl apply -f -
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "harbor | Check if Harbor is already installed"
+  ansible.builtin.command: helm status harbor -n harbor
+  register: harbor_status
+  failed_when: false
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "harbor | Install Harbor"
+  ansible.builtin.command: >
+    helm upgrade --install harbor harbor/harbor
+    --namespace harbor
+    --set expose.type=nodePort
+    --set expose.nodePort.ports.http.nodePort=30880
+    --set expose.tls.enabled=false
+    --set externalURL=http://10.0.0.9:30880
+    --set harborAdminPassword={{ vault_harbor_admin_password }}
+    --set persistence.enabled=true
+    --set persistence.persistentVolumeClaim.registry.storageClass=local-path
+    --set persistence.persistentVolumeClaim.jobservice.storageClass=local-path
+    --set persistence.persistentVolumeClaim.database.storageClass=local-path
+    --set persistence.persistentVolumeClaim.redis.storageClass=local-path
+    --set persistence.persistentVolumeClaim.trivy.storageClass=local-path
+    --wait --timeout 10m
+  when: harbor_status.rc != 0
+  no_log: true
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "harbor | Wait for Harbor core to be ready"
+  ansible.builtin.command: kubectl rollout status deployment/harbor-core -n harbor --timeout=300s
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config

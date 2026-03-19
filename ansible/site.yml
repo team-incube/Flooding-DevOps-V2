@@ -1,0 +1,91 @@
+---
+# Master Playbook — School Integrated Management Service
+# Execution order follows layer dependencies.
+
+# ─────────────────────────────────────────────
+# Layer 0 — Common baseline (ALL nodes)
+# ─────────────────────────────────────────────
+- name: "L0 | Common baseline"
+  hosts: k8s_cluster
+  become: true
+  gather_facts: true
+  tags: [common, l0]
+  roles:
+    - role: common
+
+# ─────────────────────────────────────────────
+# Layer 1 — Kubernetes (kubeadm / kubelet / kubectl)
+# ─────────────────────────────────────────────
+- name: "L1 | Kubernetes — install packages (all nodes)"
+  hosts: k8s_cluster
+  become: true
+  gather_facts: true
+  tags: [kubernetes, l1]
+  roles:
+    - role: kubernetes
+
+# ─────────────────────────────────────────────
+# Layer 2 — Cilium CNI (control-plane only — Helm install)
+# ─────────────────────────────────────────────
+- name: "L2 | Cilium CNI"
+  hosts: control_plane
+  become: true
+  gather_facts: true
+  tags: [cilium, l2]
+  roles:
+    - role: cilium
+
+# ─────────────────────────────────────────────
+# Layer 3 — Traefik Ingress (control-plane only — Helm install)
+# ─────────────────────────────────────────────
+- name: "L3 | Traefik Ingress"
+  hosts: control_plane
+  become: true
+  gather_facts: true
+  tags: [traefik, l3]
+  roles:
+    - role: traefik
+
+# ─────────────────────────────────────────────
+# Layer 4 — Observability (Prometheus + Loki + Grafana)
+# ─────────────────────────────────────────────
+- name: "L4 | Observability stack"
+  hosts: control_plane
+  become: true
+  gather_facts: true
+  tags: [observability, l4]
+  roles:
+    - role: observability
+
+# ─────────────────────────────────────────────
+# Layer 5 — Harbor (private registry)
+# ─────────────────────────────────────────────
+- name: "L5 | Harbor private registry"
+  hosts: control_plane
+  become: true
+  gather_facts: true
+  tags: [harbor, l5]
+  roles:
+    - role: harbor
+
+# ─────────────────────────────────────────────
+# Layer 6 — ArgoCD (GitOps)
+# ─────────────────────────────────────────────
+- name: "L6 | ArgoCD"
+  hosts: control_plane
+  become: true
+  gather_facts: true
+  tags: [argocd, l6]
+  roles:
+    - role: argocd
+
+# ─────────────────────────────────────────────
+# Layer 7 — LangChain AI Agent pods
+# ─────────────────────────────────────────────
+- name: "L7 | LangChain AI Agent"
+  hosts: control_plane
+  become: true
+  gather_facts: true
+  tags: [langchain, l7]
+  roles:
+    - role: langchain

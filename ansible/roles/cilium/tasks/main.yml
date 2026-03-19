@@ -1,0 +1,42 @@
+---
+# Role: cilium
+# Layer 2 — Runs on control-plane only
+# Purpose: Install Cilium CNI via Helm in kube-proxy replacement mode.
+
+- name: "cilium | Add Helm repo"
+  ansible.builtin.command: helm repo add cilium https://helm.cilium.io/
+  changed_when: false
+
+- name: "cilium | Update Helm repos"
+  ansible.builtin.command: helm repo update
+  changed_when: false
+
+- name: "cilium | Check if Cilium is already installed"
+  ansible.builtin.command: helm status cilium -n {{ cilium_namespace }}
+  register: cilium_status
+  failed_when: false
+  changed_when: false
+
+- name: "cilium | Install Cilium"
+  ansible.builtin.command: >
+    helm upgrade --install cilium cilium/cilium
+    --version {{ cilium_version }}
+    --namespace {{ cilium_namespace }}
+    --set kubeProxyReplacement=true
+    --set k8sServiceHost={{ private_ip }}
+    --set k8sServicePort=6443
+    --set hubble.relay.enabled=true
+    --set hubble.ui.enabled=true
+    --set ipam.mode=kubernetes
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  when: cilium_status.rc != 0
+
+- name: "cilium | Wait for Cilium DaemonSet to be ready"
+  ansible.builtin.command: >
+    kubectl rollout status daemonset/cilium
+    -n {{ cilium_namespace }}
+    --timeout=300s
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false

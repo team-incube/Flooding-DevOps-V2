@@ -1,0 +1,73 @@
+---
+# Role: langchain
+# Layer 7 — Runs on control-plane only
+# Purpose: Deploy Flooding Infra Agent (Slack Bolt + FastAPI) on k8s.
+#   - Creates `flooding` namespace
+#   - Creates harbor-pull-secret for private registry auth
+#   - Creates infra-agent-secret with all LLM + Slack env vars
+#   - Applies RBAC (ServiceAccount / ClusterRole / ClusterRoleBinding)
+#   - Applies Deployment + Service (NodePort 30200)
+
+- name: "langchain | Create namespace"
+  ansible.builtin.shell:
+    cmd: kubectl create namespace {{ langchain_namespace }} --dry-run=client -o yaml | kubectl apply -f -
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false
+
+# ── Harbor pull secret ────────────────────────────────────────────────────────
+- name: "langchain | Create harbor-pull-secret"
+  ansible.builtin.shell:
+    cmd: >
+      kubectl create secret docker-registry harbor-pull-secret
+      --docker-server={{ langchain_harbor_host }}
+      --docker-username=admin
+      --docker-password={{ vault_harbor_admin_password }}
+      --namespace {{ langchain_namespace }}
+      --dry-run=client -o yaml | kubectl apply -f -
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false
+  no_log: true
+
+# ── Infra-agent secret (all env vars) ────────────────────────────────────────
+- name: "langchain | Create infra-agent-secret"
+  ansible.builtin.shell:
+    cmd: >
+      kubectl create secret generic infra-agent-secret
+      --from-literal=OPENAI_API_KEY={{ vault_llm_api_key }}
+      --from-literal=SLACK_BOT_TOKEN={{ vault_slack_bot_token }}
+      --from-literal=SLACK_APP_TOKEN={{ vault_slack_app_token }}
+      --from-literal=SLACK_SIGNING_SECRET={{ vault_slack_signing_secret }}
+      --from-literal=SLACK_ALERT_CHANNEL="{{ langchain_alert_channel }}"
+      --from-literal=OPENAI_MODEL={{ langchain_openai_model }}
+      --from-literal=PROMETHEUS_URL={{ langchain_prometheus_url }}
+      --from-literal=LOKI_URL={{ langchain_loki_url }}
+      --namespace {{ langchain_namespace }}
+      --dry-run=client -o yaml | kubectl apply -f -
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false
+  no_log: true
+
+# ── Render & apply manifest ───────────────────────────────────────────────────
+- name: "langchain | Render agent manifest"
+  ansible.builtin.template:
+    src: agent-deployment.yml.j2
+    dest: /tmp/infra-agent-manifest.yml
+    mode: "0644"
+
+- name: "langchain | Apply RBAC + Deployment + Service"
+  ansible.builtin.command: kubectl apply -f /tmp/infra-agent-manifest.yml
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: true
+
+- name: "langchain | Wait for infra-agent rollout"
+  ansible.builtin.command: >
+    kubectl rollout status deployment/infra-agent
+    -n {{ langchain_namespace }}
+    --timeout=300s
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false

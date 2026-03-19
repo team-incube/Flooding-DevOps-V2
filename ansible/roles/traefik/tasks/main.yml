@@ -1,0 +1,49 @@
+---
+# Role: traefik
+# Layer 3 — Runs on control-plane only
+# Purpose: Install Traefik v3.x Ingress controller via Helm.
+
+- name: "traefik | Create namespace"
+  ansible.builtin.shell:
+    cmd: kubectl create namespace {{ traefik_namespace }} --dry-run=client -o yaml | kubectl apply -f -
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false
+
+- name: "traefik | Add Helm repo"
+  ansible.builtin.command: helm repo add traefik https://traefik.github.io/charts
+  changed_when: false
+
+- name: "traefik | Update Helm repos"
+  ansible.builtin.command: helm repo update
+  changed_when: false
+
+- name: "traefik | Check if Traefik is already installed"
+  ansible.builtin.command: helm status traefik -n {{ traefik_namespace }}
+  register: traefik_status
+  failed_when: false
+  changed_when: false
+
+- name: "traefik | Install Traefik"
+  ansible.builtin.command: >
+    helm upgrade --install traefik traefik/traefik
+    --version {{ traefik_chart_version }}
+    --namespace {{ traefik_namespace }}
+    --set ports.web.exposedPort=80
+    --set ports.websecure.exposedPort=443
+    --set service.type=LoadBalancer
+    --set ingressRoute.dashboard.enabled=true
+    --set providers.kubernetesCRD.enabled=true
+    --set providers.kubernetesIngress.enabled=true
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  when: traefik_status.rc != 0
+
+- name: "traefik | Wait for Traefik deployment to be ready"
+  ansible.builtin.command: >
+    kubectl rollout status deployment/traefik
+    -n {{ traefik_namespace }}
+    --timeout=180s
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false

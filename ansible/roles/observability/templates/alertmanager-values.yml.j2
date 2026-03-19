@@ -1,0 +1,42 @@
+---
+# Alertmanager custom values for kube-prometheus-stack
+# Injected by Ansible observability role.
+# Sends alerts to:
+#   1. Slack (via Incoming Webhook)
+#   2. infra-agent FastAPI endpoint (http://infra-agent.flooding.svc/webhook/alertmanager)
+
+alertmanager:
+  config:
+    global:
+      slack_api_url: "{{ vault_slack_webhook_url }}"
+      resolve_timeout: 5m
+
+    route:
+      group_by: ["alertname", "namespace"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: "default"
+      routes:
+        - matchers:
+            - alertname =~ ".*"
+          receiver: "default"
+
+    receivers:
+      - name: "default"
+        slack_configs:
+          - channel: "#infra-alerts"
+            send_resolved: true
+            title: |-
+              [{{ "{{" }} .Status | toUpper {{ "}}" }}{{ "{{" }} if eq .Status "firing" {{ "}}" }}:{{ "{{" }} .Alerts.Firing | len {{ "}}" }}{{ "{{" }} end {{ "}}" }}] {{ "{{" }} .CommonLabels.alertname {{ "}}" }}
+            text: |-
+              {{ "{{" }} range .Alerts {{ "}}" }}
+              *Alert:* {{ "{{" }} .Annotations.summary {{ "}}" }}
+              *Description:* {{ "{{" }} .Annotations.description {{ "}}" }}
+              *Namespace:* {{ "{{" }} .Labels.namespace {{ "}}" }}
+              *Severity:* {{ "{{" }} .Labels.severity {{ "}}" }}
+              {{ "{{" }} end {{ "}}" }}
+        webhook_configs:
+          - url: "http://infra-agent.flooding.svc/webhook/alertmanager"
+            send_resolved: true
+            max_alerts: 20

@@ -1,0 +1,90 @@
+---
+# Role: observability
+# Layer 4 — Runs on control-plane only
+# Purpose: Deploy Prometheus Stack + Loki + Grafana via Helm.
+
+- name: "observability | Create namespace"
+  ansible.builtin.shell:
+    cmd: kubectl create namespace {{ observability_namespace }} --dry-run=client -o yaml | kubectl apply -f -
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false
+
+- name: "observability | Add prometheus-community Helm repo"
+  ansible.builtin.command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  changed_when: false
+
+- name: "observability | Add grafana Helm repo"
+  ansible.builtin.command: helm repo add grafana https://grafana.github.io/helm-charts
+  changed_when: false
+
+- name: "observability | Update Helm repos"
+  ansible.builtin.command: helm repo update
+  changed_when: false
+
+# ── kube-prometheus-stack (Prometheus + Alertmanager + Grafana) ──────────────
+
+- name: "observability | Check if kube-prometheus-stack is installed"
+  ansible.builtin.command: helm status kube-prometheus-stack -n {{ observability_namespace }}
+  register: prom_status
+  failed_when: false
+  changed_when: false
+
+- name: "observability | Render Alertmanager values"
+  ansible.builtin.template:
+    src: alertmanager-values.yml.j2
+    dest: /tmp/alertmanager-values.yml
+    mode: "0600"
+
+- name: "observability | Install kube-prometheus-stack"
+  ansible.builtin.command: >
+    helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack
+    --version {{ kube_prometheus_stack_version }}
+    --namespace {{ observability_namespace }}
+    --set grafana.adminPassword={{ vault_grafana_admin_password }}
+    --set prometheus.prometheusSpec.retention=15d
+    -f /tmp/alertmanager-values.yml
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  when: prom_status.rc != 0
+
+- name: "observability | Upgrade kube-prometheus-stack (already installed)"
+  ansible.builtin.command: >
+    helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack
+    --version {{ kube_prometheus_stack_version }}
+    --namespace {{ observability_namespace }}
+    --reuse-values
+    -f /tmp/alertmanager-values.yml
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  when: prom_status.rc == 0
+
+# ── Loki Stack (Loki + Promtail) ─────────────────────────────────────────────
+
+- name: "observability | Check if loki-stack is installed"
+  ansible.builtin.command: helm status loki-stack -n {{ observability_namespace }}
+  register: loki_status
+  failed_when: false
+  changed_when: false
+
+- name: "observability | Install loki-stack"
+  ansible.builtin.command: >
+    helm upgrade --install loki-stack grafana/loki-stack
+    --version {{ loki_stack_version }}
+    --namespace {{ observability_namespace }}
+    --set grafana.enabled=false
+    --set promtail.enabled=true
+    --set loki.persistence.enabled=true
+    --set loki.persistence.size=20Gi
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  when: loki_status.rc != 0
+
+- name: "observability | Wait for Prometheus operator to be ready"
+  ansible.builtin.command: >
+    kubectl rollout status deployment/kube-prometheus-stack-operator
+    -n {{ observability_namespace }}
+    --timeout=300s
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false

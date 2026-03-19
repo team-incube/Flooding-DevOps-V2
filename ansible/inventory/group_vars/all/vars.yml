@@ -1,0 +1,32 @@
+---
+# Non-secret cluster-wide variables
+
+k8s_version: "1.29"
+k8s_apt_keyring_path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+cilium_version: "1.15.3"
+cilium_namespace: kube-system
+
+traefik_namespace: traefik
+traefik_chart_version: "27.0.2"
+
+observability_namespace: monitoring
+kube_prometheus_stack_version: "58.2.2"
+loki_stack_version: "2.10.2"
+
+harbor_namespace: harbor
+harbor_chart_version: "1.14.2"
+harbor_node_ip: "10.0.0.9"       # gsmsv-4 private IP
+harbor_node_port: 30104            # NodePort (30000-32767 범위)
+
+argocd_namespace: argocd
+argocd_chart_version: "6.7.18"
+argocd_node_port: 30101            # NodePort (30000-32767 범위)
+
+langchain_namespace: flooding
+langchain_harbor_host: "gsmsv-1.yujun.kr:28104"
+langchain_image: "{{ langchain_harbor_host }}/flooding/infra-agent:latest"
+langchain_openai_model: "gpt-4o"
+langchain_alert_channel: "#infra-alerts"
+langchain_prometheus_url: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090"
+langchain_loki_url: "http://loki-stack.monitoring.svc:3100"

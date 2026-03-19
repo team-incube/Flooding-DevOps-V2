@@ -1,0 +1,18 @@
+---
+# Template: IngressRoute for {{ app_name }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ app_name }}-route
+  namespace: {{ app_namespace }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ app_host }}`)
+      kind: Rule
+      services:
+        - name: {{ app_service }}
+          port: {{ app_port }}
+  tls:
+    certResolver: letsencrypt

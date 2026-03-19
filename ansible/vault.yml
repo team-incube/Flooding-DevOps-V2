@@ -1,0 +1,12 @@
+# This file must be encrypted with ansible-vault before committing.
+# Run: ansible-vault encrypt vault.yml
+#
+# vault_k8s_join_token: ""
+# vault_db_password: ""
+# vault_llm_api_key: ""
+# vault_slack_webhook_url: ""
+# vault_harbor_admin_password: ""
+# vault_grafana_admin_password: ""
+#
+# To encrypt individual strings:
+#   ansible-vault encrypt_string '<value>' --name 'vault_<name>'

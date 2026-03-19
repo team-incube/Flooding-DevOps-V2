@@ -1,0 +1,93 @@
+---
+# Role: common
+# Layer 0 — Applied to ALL nodes
+# Purpose: Baseline OS configuration required before Kubernetes installation.
+
+- name: "common | Update apt cache"
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: "common | Install required system packages"
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - git
+      - vim
+      - htop
+      - net-tools
+      - nfs-common          # needed for NFS persistent volumes on gsmsv-4
+    state: present
+
+- name: "common | Disable swap (runtime)"
+  ansible.builtin.command: swapoff -a
+  changed_when: false
+
+- name: "common | Disable swap (persistent — comment out /etc/fstab)"
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\sswap\s.*)$'
+    replace: '# \1'
+
+- name: "common | Load required kernel modules"
+  ansible.builtin.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: "common | Persist kernel modules across reboots"
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/k8s.conf
+    content: |
+      overlay
+      br_netfilter
+    mode: "0644"
+
+- name: "common | Set sysctl params for Kubernetes networking"
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_set: true
+    state: present
+    reload: true
+  loop:
+    - { key: "net.bridge.bridge-nf-call-iptables",  value: "1" }
+    - { key: "net.bridge.bridge-nf-call-ip6tables", value: "1" }
+    - { key: "net.ipv4.ip_forward",                 value: "1" }
+
+- name: "common | Install containerd"
+  ansible.builtin.apt:
+    name: containerd
+    state: present
+
+- name: "common | Ensure containerd config directory exists"
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    mode: "0755"
+
+- name: "common | Generate default containerd config"
+  ansible.builtin.shell:
+    cmd: containerd config default > /etc/containerd/config.toml
+    creates: /etc/containerd/config.toml
+
+- name: "common | Enable SystemdCgroup in containerd config"
+  ansible.builtin.replace:
+    path: /etc/containerd/config.toml
+    regexp: 'SystemdCgroup = false'
+    replace: 'SystemdCgroup = true'
+  notify: Restart containerd
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: "common | Enable and start containerd"
+  ansible.builtin.systemd:
+    name: containerd
+    enabled: true
+    state: started
+  ignore_errors: "{{ ansible_check_mode }}"

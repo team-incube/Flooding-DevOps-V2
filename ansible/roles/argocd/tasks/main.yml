@@ -1,0 +1,54 @@
+# ArgoCD — GitOps continuous delivery
+- name: "argocd | Add ArgoCD Helm repo"
+  ansible.builtin.command: helm repo add argo https://argoproj.github.io/argo-helm
+  changed_when: false
+
+- name: "argocd | Update Helm repos"
+  ansible.builtin.command: helm repo update
+  changed_when: false
+
+- name: "argocd | Create namespace"
+  ansible.builtin.shell: kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "argocd | Check if ArgoCD is already installed"
+  ansible.builtin.command: helm status argocd -n argocd
+  register: argocd_status
+  failed_when: false
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "argocd | Install ArgoCD"
+  ansible.builtin.command: >
+    helm upgrade --install argocd argo/argo-cd
+    --namespace argocd
+    --set server.service.type=NodePort
+    --set server.service.nodePortHttp=30880
+    --set server.service.nodePortHttps=30443
+    --set configs.params."server\.insecure"=true
+    --wait --timeout 10m
+  when: argocd_status.rc != 0
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "argocd | Wait for ArgoCD server to be ready"
+  ansible.builtin.command: kubectl rollout status deployment/argocd-server -n argocd --timeout=300s
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "argocd | Get and decode initial admin password"
+  ansible.builtin.shell: |
+    kubectl get secret argocd-initial-admin-secret -n argocd \
+      -o jsonpath="{.data.password}" | base64 -d
+  register: argocd_admin_pw
+  changed_when: false
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "argocd | Show initial admin password"
+  ansible.builtin.debug:
+    msg: "ArgoCD admin password: {{ argocd_admin_pw.stdout }}"
