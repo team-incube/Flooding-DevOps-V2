@@ -1,0 +1,21 @@
+# Old placeholder — not used by the real agent
+app/
+
+# k8s manifests (not needed inside the container)
+k8s/
+
+# Dev / local files
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.git/
+.gitignore

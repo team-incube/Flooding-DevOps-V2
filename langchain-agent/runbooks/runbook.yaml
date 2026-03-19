@@ -1,0 +1,89 @@
+runbooks:
+  - id: crashloop
+    pattern: "CrashLoopBackOff"
+    description: "Pod is crash looping"
+    diagnosis:
+      - "Check recent logs: kubectl logs <pod> --previous"
+      - "Check resource limits vs actual usage in Prometheus"
+      - "Check if recent deployment caused regression (helm history)"
+      - "Check OOMKilled in describe pod"
+    actions:
+      - type: rollback
+        description: "Rollback to previous Helm release revision"
+        requires_approval: true
+        tool: helm_tool.rollback_release
+      - type: describe
+        description: "Get detailed pod description with events"
+        requires_approval: false
+        tool: kubectl_tool.describe_pod
+
+  - id: oom_killed
+    pattern: "OOMKilled"
+    description: "Pod killed due to out-of-memory"
+    diagnosis:
+      - "Check memory usage trend: container_memory_usage_bytes"
+      - "Check if memory limit is set too low in values.yaml"
+      - "Check for memory leaks in error logs"
+    actions:
+      - type: scale_down
+        description: "Scale down replicas to reduce memory pressure temporarily"
+        requires_approval: true
+        tool: kubectl_tool.scale_deployment
+      - type: suggest
+        description: "Suggest increasing memory limits in Helm values.yaml"
+        requires_approval: false
+
+  - id: high_error_rate
+    pattern: "error rate > 5%"
+    description: "Service HTTP error rate exceeded 5% threshold"
+    diagnosis:
+      - "Check application error logs in Loki for root cause"
+      - "Check recent Helm deployments (helm history)"
+      - "Check DB connection errors in logs"
+      - "Check downstream service health"
+    actions:
+      - type: rollback
+        description: "Rollback to last known good Helm release"
+        requires_approval: true
+        tool: helm_tool.rollback_release
+
+  - id: node_disk_pressure
+    pattern: "NodeDiskPressure"
+    description: "Node disk usage is critical"
+    diagnosis:
+      - "Check disk usage: df -h on affected node"
+      - "Check for large log files or old container images"
+      - "Check PVC usage"
+    actions:
+      - type: restart
+        description: "Restart pods to release ephemeral storage"
+        requires_approval: true
+        tool: kubectl_tool.restart_deployment
+
+  - id: pod_pending
+    pattern: "Pending"
+    description: "Pod stuck in Pending state"
+    diagnosis:
+      - "Check node resource availability (get_node_status)"
+      - "Check PVC binding status"
+      - "Check for taints/tolerations mismatch"
+      - "Check events for scheduling failures"
+    actions:
+      - type: describe
+        description: "Describe pod to see scheduling events"
+        requires_approval: false
+        tool: kubectl_tool.describe_pod
+
+  - id: image_pull_error
+    pattern: "ImagePullBackOff"
+    description: "Pod cannot pull container image"
+    diagnosis:
+      - "Check if Harbor registry is accessible"
+      - "Check if image tag exists in Harbor"
+      - "Check if imagePullSecret is configured"
+      - "Check containerd insecure registry settings"
+    actions:
+      - type: describe
+        description: "Describe pod to see exact pull error"
+        requires_approval: false
+        tool: kubectl_tool.describe_pod
