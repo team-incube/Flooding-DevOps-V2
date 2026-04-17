@@ -17,7 +17,7 @@ loki_stack_version: "2.10.2"
 harbor_namespace: harbor
 harbor_chart_version: "1.14.2"
 harbor_node_ip: "10.0.0.9"       # gsmsv-4 private IP
-harbor_node_port: 30104            # NodePort (30000-32767 범위)
+harbor_node_port: 30880            # NodePort (30000-32767 범위)
 
 argocd_namespace: argocd
 argocd_chart_version: "6.7.18"

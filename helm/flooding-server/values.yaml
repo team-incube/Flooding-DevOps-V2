@@ -17,6 +17,8 @@ service:
 
 ingress:
   host: gsmsv-1.yujun.kr
+  entryPoints:
+    - web
 
 resources:
   requests:

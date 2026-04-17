@@ -28,9 +28,9 @@
     helm upgrade --install harbor harbor/harbor
     --namespace harbor
     --set expose.type=nodePort
-    --set expose.nodePort.ports.http.nodePort=30880
+    --set expose.nodePort.ports.http.nodePort={{ harbor_node_port }}
     --set expose.tls.enabled=false
-    --set externalURL=http://10.0.0.9:30880
+    --set externalURL=http://{{ harbor_node_ip }}:{{ harbor_node_port }}
     --set harborAdminPassword={{ vault_harbor_admin_password }}
     --set persistence.enabled=true
     --set persistence.persistentVolumeClaim.registry.storageClass=local-path

@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: flooding-server-dev
+  namespace: argocd
+  labels:
+    app: flooding-server
+    env: dev
+    team: incube
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/team-incube/Flooding-DevOps-V2
+    targetRevision: main
+    path: helm/flooding-server
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-dev.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: flooding-dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        maxDuration: 3m
+        factor: 2

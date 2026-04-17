@@ -1,5 +1,13 @@
-# Develop / Staging overrides
+# Develop overrides — managed by CD for dev/develop branch
+image:
+  tag: "develop-latest"
+
 replicaCount: 1
+
+ingress:
+  host: gsmsv-1.yujun.kr
+  entryPoints:
+    - dev
 
 resources:
   requests:

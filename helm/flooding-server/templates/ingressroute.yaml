@@ -6,7 +6,7 @@ metadata:
     {{- include "flooding-server.labels" . | nindent 4 }}
 spec:
   entryPoints:
-    - web
+    {{- toYaml .Values.ingress.entryPoints | nindent 4 }}
   routes:
     - match: Host(`{{ .Values.ingress.host }}`)
       kind: Rule
