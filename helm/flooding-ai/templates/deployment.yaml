@@ -35,15 +35,13 @@ spec:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
           livenessProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: {{ .Values.service.port }}
             initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
           readinessProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: {{ .Values.service.port }}
             initialDelaySeconds: 15
             periodSeconds: 10
