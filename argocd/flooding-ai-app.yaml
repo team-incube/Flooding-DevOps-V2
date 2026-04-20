@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: flooding-ai
+  namespace: argocd
+  labels:
+    app: flooding-ai
+    team: incube
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/team-incube/Flooding-DevOps-V2
+    targetRevision: main
+    path: helm/flooding-ai
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: flooding
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        maxDuration: 3m
+        factor: 2

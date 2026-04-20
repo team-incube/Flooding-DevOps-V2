@@ -1,0 +1,17 @@
+image:
+  repository: baeyongbin/flooding-ai
+  tag: "latest"
+  pullPolicy: Always
+
+replicaCount: 1
+
+service:
+  port: 8000
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "2000m"
+    memory: "2Gi"

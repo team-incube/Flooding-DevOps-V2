@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flooding-ai
+  namespace: flooding
+  labels:
+    app: flooding-ai
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: flooding-ai
+  template:
+    metadata:
+      labels:
+        app: flooding-ai
+    spec:
+      nodeSelector:
+        role: ai
+      tolerations:
+        - key: role
+          value: ai
+          effect: NoSchedule
+      containers:
+        - name: flooding-ai
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
