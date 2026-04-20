@@ -6,9 +6,10 @@ metadata:
   labels:
     app: flooding-ai
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: flooding-ai
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.port }}
+      nodePort: {{ .Values.service.nodePort }}

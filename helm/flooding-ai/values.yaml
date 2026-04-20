@@ -7,6 +7,7 @@ replicaCount: 1
 
 service:
   port: 8000
+  nodePort: 32677
 
 resources:
   requests:
