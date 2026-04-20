@@ -1,0 +1,60 @@
+---
+- name: Apply flooding-server-secret (prod)
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: flooding-server-secret
+        namespace: flooding
+      type: Opaque
+      stringData:
+        DB_DRIVER: "org.postgresql.Driver"
+        DB_URL: "jdbc:postgresql://postgres.flooding.svc:5432/flooding"
+        DB_USERNAME: "flooding"
+        DB_PASSWORD: "{{ vault_db_password }}"
+        JPA_DDL_AUTO: "update"
+        JPA_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
+        JWT_SECRET: "{{ vault_jwt_secret }}"
+        JWT_ACCESS_EXPIRATION: "{{ vault_jwt_access_expiration }}"
+        JWT_REFRESH_EXPIRATION: "{{ vault_jwt_refresh_expiration }}"
+        OAUTH_CLIENT_ID: "{{ vault_oauth_client_id }}"
+        OAUTH_CLIENT_SECRET: "{{ vault_oauth_client_secret }}"
+        REDIS_HOST: "redis.flooding.svc"
+        REDIS_PORT: "6379"
+        DATAGSM_OPEN_API_KEY: "{{ vault_datagsm_open_api_key }}"
+        DATAGSM_NEIS_MEALS_BASE_URL: "{{ vault_datagsm_neis_meals_base_url }}"
+        DATAGSM_NEIS_MEALS_API_KEY: "{{ vault_datagsm_neis_meals_api_key }}"
+        NEIS_TIMETABLE_API_KEY: "{{ vault_neis_timetable_api_key }}"
+        NEIS_OPENAPI_TIMETABLE_BASE_URL: "{{ vault_neis_openapi_timetable_base_url }}"
+
+- name: Apply flooding-server-secret (dev)
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: flooding-server-secret
+        namespace: flooding-dev
+      type: Opaque
+      stringData:
+        DB_DRIVER: "org.postgresql.Driver"
+        DB_URL: "jdbc:postgresql://postgres.flooding.svc:5432/flooding"
+        DB_USERNAME: "flooding"
+        DB_PASSWORD: "{{ vault_db_password }}"
+        JPA_DDL_AUTO: "update"
+        JPA_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
+        JWT_SECRET: "{{ vault_jwt_secret }}"
+        JWT_ACCESS_EXPIRATION: "{{ vault_jwt_access_expiration }}"
+        JWT_REFRESH_EXPIRATION: "{{ vault_jwt_refresh_expiration }}"
+        OAUTH_CLIENT_ID: "{{ vault_oauth_client_id }}"
+        OAUTH_CLIENT_SECRET: "{{ vault_oauth_client_secret }}"
+        REDIS_HOST: "redis.flooding.svc"
+        REDIS_PORT: "6379"
+        DATAGSM_OPEN_API_KEY: "{{ vault_datagsm_open_api_key }}"
+        DATAGSM_NEIS_MEALS_BASE_URL: "{{ vault_datagsm_neis_meals_base_url }}"
+        DATAGSM_NEIS_MEALS_API_KEY: "{{ vault_datagsm_neis_meals_api_key }}"
+        NEIS_TIMETABLE_API_KEY: "{{ vault_neis_timetable_api_key }}"
+        NEIS_OPENAPI_TIMETABLE_BASE_URL: "{{ vault_neis_openapi_timetable_base_url }}"
