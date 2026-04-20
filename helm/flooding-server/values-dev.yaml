@@ -22,3 +22,15 @@ autoscaling:
 
 env:
   SPRING_PROFILES_ACTIVE: dev
+
+livenessProbe:
+  port: 8080
+  initialDelaySeconds: 90
+  periodSeconds: 15
+  failureThreshold: 3
+
+readinessProbe:
+  port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  failureThreshold: 3
