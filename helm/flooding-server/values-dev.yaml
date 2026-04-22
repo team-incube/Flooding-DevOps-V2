@@ -5,7 +5,7 @@ image:
 replicaCount: 1
 
 ingress:
-  host: gsmsv-1.yujun.kr
+  host: service.gsmsv.site
   entryPoints:
     - dev
 

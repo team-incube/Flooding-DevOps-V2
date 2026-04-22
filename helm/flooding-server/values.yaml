@@ -16,7 +16,7 @@ service:
   port: 8080
 
 ingress:
-  host: gsmsv-1.yujun.kr
+  host: service.gsmsv.site
   entryPoints:
     - web
 
