@@ -10,6 +10,7 @@ ingress:
     - service.gsmsv.site
   entryPoints:
     - dev
+  tls: null
 
 resources:
   requests:
