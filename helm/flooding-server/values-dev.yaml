@@ -8,6 +8,8 @@ ingress:
   host: api.flooding.kr
   entryPoints:
     - dev
+  tls:
+    secretName: api-flooding-kr-tls
 
 resources:
   requests:

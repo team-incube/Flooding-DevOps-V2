@@ -1,0 +1,83 @@
+---
+- name: "cert-manager | Add Helm repo"
+  ansible.builtin.command: helm repo add jetstack https://charts.jetstack.io
+  changed_when: false
+
+- name: "cert-manager | Update Helm repos"
+  ansible.builtin.command: helm repo update
+  changed_when: false
+
+- name: "cert-manager | Install cert-manager with CRDs"
+  ansible.builtin.command: >
+    helm upgrade --install cert-manager jetstack/cert-manager
+    --namespace cert-manager
+    --create-namespace
+    --version v1.14.4
+    --set installCRDs=true
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "cert-manager | Wait for cert-manager to be ready"
+  ansible.builtin.command: >
+    kubectl rollout status deployment/cert-manager
+    -n cert-manager --timeout=120s
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+  changed_when: false
+
+- name: "cert-manager | Create Cloudflare API token secret"
+  ansible.builtin.shell: |
+    kubectl apply -f - <<EOF
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: cloudflare-api-token
+      namespace: cert-manager
+    type: Opaque
+    stringData:
+      api-token: "{{ vault_cloudflare_token }}"
+    EOF
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "cert-manager | Apply ClusterIssuer"
+  ansible.builtin.shell: |
+    kubectl apply -f - <<EOF
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+      name: letsencrypt-prod
+    spec:
+      acme:
+        server: https://acme-v02.api.letsencrypt.org/directory
+        email: gsmaws03@gsm.hs.kr
+        privateKeySecretRef:
+          name: letsencrypt-prod-account-key
+        solvers:
+          - dns01:
+              cloudflare:
+                apiTokenSecretRef:
+                  name: cloudflare-api-token
+                  key: api-token
+    EOF
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+- name: "cert-manager | Apply Certificate for api.flooding.kr"
+  ansible.builtin.shell: |
+    kubectl apply -f - <<EOF
+    apiVersion: cert-manager.io/v1
+    kind: Certificate
+    metadata:
+      name: api-flooding-kr-tls
+      namespace: traefik
+    spec:
+      secretName: api-flooding-kr-tls
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+      dnsNames:
+        - api.flooding.kr
+    EOF
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config

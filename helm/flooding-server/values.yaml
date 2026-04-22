@@ -18,7 +18,9 @@ service:
 ingress:
   host: api.flooding.kr
   entryPoints:
-    - web
+    - websecure
+  tls:
+    secretName: api-flooding-kr-tls
 
 resources:
   requests:

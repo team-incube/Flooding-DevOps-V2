@@ -1,0 +1,29 @@
+service:
+  type: NodePort
+
+ports:
+  web:
+    port: 8080
+    exposedPort: 80
+  websecure:
+    port: 8443
+    exposedPort: 443
+    nodePort: 32675
+    tls:
+      enabled: true
+  dev:
+    port: 9443
+    exposedPort: 9443
+    nodePort: 32676
+    tls:
+      enabled: true
+
+ingressRoute:
+  dashboard:
+    enabled: true
+
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true

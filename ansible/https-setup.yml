@@ -1,0 +1,30 @@
+---
+- name: Set up HTTPS — Traefik reconfigure + cert-manager + Let's Encrypt
+  hosts: control_plane[0]
+  gather_facts: false
+
+  tasks:
+    - name: "traefik | Copy values file to remote"
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../infra/traefik-values.yaml"
+        dest: /tmp/traefik-values.yaml
+
+    - name: "traefik | Upgrade with HTTPS entrypoints"
+      ansible.builtin.command: >
+        helm upgrade --install traefik traefik/traefik
+        --version 27.0.2
+        --namespace traefik
+        -f /tmp/traefik-values.yaml
+      environment:
+        KUBECONFIG: /home/ubuntu/.kube/config
+
+    - name: "traefik | Wait for Traefik rollout"
+      ansible.builtin.command: >
+        kubectl rollout status deployment/traefik
+        -n traefik --timeout=120s
+      environment:
+        KUBECONFIG: /home/ubuntu/.kube/config
+      changed_when: false
+
+  roles:
+    - cert-manager

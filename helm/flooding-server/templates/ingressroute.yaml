@@ -13,3 +13,7 @@ spec:
       services:
         - name: {{ include "flooding-server.fullname" . }}
           port: {{ .Values.service.port }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
