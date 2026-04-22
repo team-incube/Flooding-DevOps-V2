@@ -16,7 +16,7 @@ service:
   port: 8080
 
 ingress:
-  host: service.gsmsv.site
+  host: api.flooding.kr
   entryPoints:
     - web
 

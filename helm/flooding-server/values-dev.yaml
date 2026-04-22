@@ -5,7 +5,7 @@ image:
 replicaCount: 1
 
 ingress:
-  host: service.gsmsv.site
+  host: api.flooding.kr
   entryPoints:
     - dev
 
