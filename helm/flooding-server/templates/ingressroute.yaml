@@ -8,7 +8,11 @@ spec:
   entryPoints:
     {{- toYaml .Values.ingress.entryPoints | nindent 4 }}
   routes:
-    - match: Host(`{{ .Values.ingress.host }}`)
+    - match: {{ if .Values.ingress.extraHosts -}}
+        Host(`{{ .Values.ingress.host }}`){{ range .Values.ingress.extraHosts }} || Host(`{{ . }}`){{ end }}
+      {{- else -}}
+        Host(`{{ .Values.ingress.host }}`)
+      {{- end }}
       kind: Rule
       services:
         - name: {{ include "flooding-server.fullname" . }}

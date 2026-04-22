@@ -1,5 +1,5 @@
 service:
-  type: NodePort
+  type: LoadBalancer
 
 ports:
   web:
@@ -14,9 +14,9 @@ ports:
   dev:
     port: 9443
     exposedPort: 9443
+    expose:
+      default: true
     nodePort: 32676
-    tls:
-      enabled: true
 
 ingressRoute:
   dashboard:
