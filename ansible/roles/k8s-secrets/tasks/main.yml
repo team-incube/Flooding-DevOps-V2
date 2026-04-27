@@ -23,11 +23,13 @@
       REDIS_HOST: "redis.flooding.svc"
       REDIS_PORT: "6379"
       DATAGSM_OPEN_API_KEY: "{{ vault_datagsm_open_api_key }}"
-      DATAGSM_NEIS_MEALS_BASE_URL: "{{ vault_datagsm_neis_meals_base_url }}"
+      DATAGSM_NEIS_MEALS_BASE_URL: "https://openapi.datagsm.kr/"
       DATAGSM_NEIS_MEALS_API_KEY: "{{ vault_datagsm_neis_meals_api_key }}"
       NEIS_TIMETABLE_API_KEY: "{{ vault_neis_timetable_api_key }}"
-      NEIS_OPENAPI_TIMETABLE_BASE_URL: "{{ vault_neis_openapi_timetable_base_url }}"
+      NEIS_OPENAPI_TIMETABLE_BASE_URL: "https://open.neis.go.kr/"
       NEIS_OPENAPI_TIMETABLE_API_KEY: "{{ vault_neis_openapi_timetable_api_key }}"
+      AI_CHATBOT_URL: "http://flooding-ai.flooding.svc:8000"
+      AI_SONG_URL: "http://flooding-ai.flooding.svc:8000"
     EOF
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
@@ -56,11 +58,13 @@
       REDIS_HOST: "redis.flooding.svc"
       REDIS_PORT: "6379"
       DATAGSM_OPEN_API_KEY: "{{ vault_datagsm_open_api_key }}"
-      DATAGSM_NEIS_MEALS_BASE_URL: "{{ vault_datagsm_neis_meals_base_url }}"
+      DATAGSM_NEIS_MEALS_BASE_URL: "https://openapi.datagsm.kr/"
       DATAGSM_NEIS_MEALS_API_KEY: "{{ vault_datagsm_neis_meals_api_key }}"
       NEIS_TIMETABLE_API_KEY: "{{ vault_neis_timetable_api_key }}"
-      NEIS_OPENAPI_TIMETABLE_BASE_URL: "{{ vault_neis_openapi_timetable_base_url }}"
+      NEIS_OPENAPI_TIMETABLE_BASE_URL: "https://open.neis.go.kr/"
       NEIS_OPENAPI_TIMETABLE_API_KEY: "{{ vault_neis_openapi_timetable_api_key }}"
+      AI_CHATBOT_URL: "http://flooding-ai.flooding.svc:8000"
+      AI_SONG_URL: "http://flooding-ai.flooding.svc:8000"
     EOF
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
