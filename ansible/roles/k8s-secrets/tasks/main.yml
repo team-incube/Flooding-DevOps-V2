@@ -45,7 +45,7 @@
     type: Opaque
     stringData:
       DB_DRIVER: "org.postgresql.Driver"
-      DB_URL: "jdbc:postgresql://postgres.flooding.svc:5432/flooding"
+      DB_URL: "jdbc:postgresql://postgres.flooding.svc:5432/flooding_dev"
       DB_USERNAME: "flooding"
       DB_PASSWORD: "{{ vault_db_password }}"
       JPA_DDL_AUTO: "update"
