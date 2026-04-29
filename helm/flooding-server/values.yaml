@@ -17,6 +17,8 @@ service:
 
 ingress:
   host: api.flooding.kr
+  extraHosts:
+    - service.gsmsv.site
   entryPoints:
     - websecure
   tls:
