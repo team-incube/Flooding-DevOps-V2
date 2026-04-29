@@ -3,7 +3,7 @@
 
 image:
   repository: gsmsv-1.yujun.kr:28104/flooding/flooding-server-v2
-  tag: "master-8942635"
+  tag: "master-e692b51"
   pullPolicy: Always
 
 imagePullSecrets:
