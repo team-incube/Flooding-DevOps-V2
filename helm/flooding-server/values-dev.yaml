@@ -1,6 +1,6 @@
 # Develop overrides — managed by CD for dev/develop branch
 image:
-  tag: "develop-23d544b"
+  tag: "develop-da548ef"
 
 replicaCount: 1
 
