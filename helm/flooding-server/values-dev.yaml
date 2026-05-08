@@ -5,12 +5,12 @@ image:
 replicaCount: 1
 
 ingress:
-  host: api.flooding.kr
-  extraHosts:
-    - service.gsmsv.site
+  host: dev.flooding.kr
+  extraHosts: []
   entryPoints:
-    - dev
-  tls: null
+    - websecure
+  tls:
+    secretName: dev-flooding-kr-tls
 
 resources:
   requests:

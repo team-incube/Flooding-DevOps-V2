@@ -16,13 +16,12 @@ service:
   port: 8080
 
 ingress:
-  host: api.flooding.kr
-  extraHosts:
-    - service.gsmsv.site
+  host: prod.flooding.kr
+  extraHosts: []
   entryPoints:
     - websecure
   tls:
-    secretName: api-flooding-kr-tls
+    secretName: prod-flooding-kr-tls
 
 resources:
   requests:
