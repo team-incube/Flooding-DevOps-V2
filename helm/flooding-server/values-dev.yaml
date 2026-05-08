@@ -8,7 +8,7 @@ ingress:
   host: dev.flooding.kr
   extraHosts: []
   entryPoints:
-    - websecure
+    - dev
   tls:
     secretName: dev-flooding-kr-tls
 
