@@ -30,6 +30,8 @@
       NEIS_OPENAPI_TIMETABLE_API_KEY: "{{ vault_neis_openapi_timetable_api_key }}"
       AI_CHATBOT_URL: "http://flooding-ai.flooding.svc:8000"
       AI_SONG_URL: "http://flooding-ai.flooding.svc:8000"
+      FILE_UPLOAD_DIR: "/app/uploads"
+      FILE_BASE_URL: "https://prod.flooding.kr/"
     EOF
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
@@ -65,6 +67,8 @@
       NEIS_OPENAPI_TIMETABLE_API_KEY: "{{ vault_neis_openapi_timetable_api_key }}"
       AI_CHATBOT_URL: "http://flooding-ai.flooding.svc:8000"
       AI_SONG_URL: "http://flooding-ai.flooding.svc:8000"
+      FILE_UPLOAD_DIR: "/app/uploads"
+      FILE_BASE_URL: "https://dev.flooding.kr/"
     EOF
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
