@@ -32,6 +32,11 @@
       AI_SONG_URL: "http://flooding-ai.flooding.svc:8000"
       FILE_UPLOAD_DIR: "/app/uploads"
       FILE_BASE_URL: "https://prod.flooding.kr/"
+      R2_BUCKET: "flooding-bucket"
+      R2_ENDPOINT: "https://1499f1ef89652b364430eff163d470bd.r2.cloudflarestorage.com/"
+      R2_ACCESS_KEY: "415dd75e0090418aa1d2362dd7191ad7"
+      R2_SECRET_KEY: "447136a749a4efe25a1f2667897fb92fc495b75406da11936788d8dff9932c68"
+      R2_PUBLIC_BASE_URL: "https://pub-2e450fd29a674f2ab950d5bcfab363cc.r2.dev/"
     EOF
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
@@ -69,6 +74,11 @@
       AI_SONG_URL: "http://flooding-ai.flooding.svc:8000"
       FILE_UPLOAD_DIR: "/app/uploads"
       FILE_BASE_URL: "https://dev.flooding.kr/"
+      R2_BUCKET: "flooding-bucket"
+      R2_ENDPOINT: "https://1499f1ef89652b364430eff163d470bd.r2.cloudflarestorage.com/"
+      R2_ACCESS_KEY: "415dd75e0090418aa1d2362dd7191ad7"
+      R2_SECRET_KEY: "447136a749a4efe25a1f2667897fb92fc495b75406da11936788d8dff9932c68"
+      R2_PUBLIC_BASE_URL: "https://pub-2e450fd29a674f2ab950d5bcfab363cc.r2.dev/"
     EOF
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
