@@ -160,24 +160,34 @@
 ## 7. Kubernetes Secrets
 
 ### flooding-server-secret (prod: `flooding` ns / dev: `flooding-dev` ns)
-| 키 | 값 |
-|----|-----|
-| DB_URL | `jdbc:postgresql://postgres.flooding.svc:5432/flooding` (dev: `flooding_dev`) |
-| DB_USERNAME | `flooding` |
-| DB_PASSWORD | `***REMOVED***` |
-| REDIS_HOST | `redis.flooding.svc` |
-| REDIS_PORT | `6379` |
-| JWT_SECRET | `flooding-jwt-secret-key-2026-must-be-at-least-32-chars` |
-| JWT_ACCESS_EXPIRATION | `3600000` (1시간) |
-| JWT_REFRESH_EXPIRATION | `604800000` (7일) |
-| AI_CHATBOT_URL | `http://flooding-ai.flooding.svc:8000` |
-| AI_SONG_URL | `http://flooding-ai.flooding.svc:8000` |
-| FILE_UPLOAD_DIR | `/app/uploads` |
-| FILE_BASE_URL | `https://prod.flooding.kr/` (dev: `https://dev.flooding.kr/`) |
-| R2_BUCKET | `flooding-bucket` |
-| R2_ENDPOINT | `https://1499f1ef89652b364430eff163d470bd.r2.cloudflarestorage.com/` |
-| R2_ACCESS_KEY | `415dd75e0090418aa1d2362dd7191ad7` |
-| R2_SECRET_KEY | (Ansible vault) |
-| R2_PUBLIC_BASE_URL | `https://pub-2e450fd29a674f2ab950d5bcfab363cc.r2.dev/` |
+> 실제 값은 Ansible vault (`devops-repo/ansible/vault.yml`) 에서 관리
+
+| 키 |
+|----|
+| DB_URL |
+| DB_USERNAME |
+| DB_PASSWORD |
+| REDIS_HOST |
+| REDIS_PORT |
+| JWT_SECRET |
+| JWT_ACCESS_EXPIRATION |
+| JWT_REFRESH_EXPIRATION |
+| OAUTH_CLIENT_ID |
+| OAUTH_CLIENT_SECRET |
+| DATAGSM_OPEN_API_KEY |
+| DATAGSM_NEIS_MEALS_BASE_URL |
+| DATAGSM_NEIS_MEALS_API_KEY |
+| NEIS_TIMETABLE_API_KEY |
+| NEIS_OPENAPI_TIMETABLE_BASE_URL |
+| NEIS_OPENAPI_TIMETABLE_API_KEY |
+| AI_CHATBOT_URL |
+| AI_SONG_URL |
+| FILE_UPLOAD_DIR |
+| FILE_BASE_URL |
+| R2_BUCKET |
+| R2_ENDPOINT |
+| R2_ACCESS_KEY |
+| R2_SECRET_KEY |
+| R2_PUBLIC_BASE_URL |
 
 ---
