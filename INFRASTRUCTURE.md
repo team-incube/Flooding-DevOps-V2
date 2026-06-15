@@ -9,7 +9,7 @@
 | Worker | flooding-3 | `ssh ubuntu@ssh.gsmsv.site -p 27103` | 10.0.0.8 |
 | Worker (Harbor) | flooding-4 | `ssh ubuntu@ssh.gsmsv.site -p 27104` | 10.0.0.9 |
 | Monitoring | flooding-5 | `ssh ubuntu@ssh.gsmsv.site -p 27105` | 10.0.0.10 |
-| Worker (AI, gsmsv) | gsmsv | `ssh ubuntu@ssh.gsmsv.site -p 27128` | 10.0.0.154 |
+| Worker (AI) | flooding-6 | `ssh ubuntu@ssh.gsmsv.site -p 27128` | 10.0.0.154 |
 
 - 공인 IP: `158.247.251.109` (ssh.gsmsv.site)
 - ~~`gsmsv-1.yujun.kr`~~ → DNS 레코드 삭제됨 (2026-06-15 이후 사용 불가), `ssh.gsmsv.site` 사용
