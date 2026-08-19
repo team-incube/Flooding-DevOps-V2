@@ -96,7 +96,7 @@
 
 ### PostgreSQL — `flooding` 네임스페이스
 - 이미지: postgres:16-alpine
-- DB/User: `flooding` / Password: `***REMOVED***`
+- DB/User: `flooding` / Password: (Ansible vault 참조)
 - PVC: 10Gi (local-path)
 - Service: `postgres.flooding.svc:5432`
 - prod DB: `flooding`, dev DB: `flooding_dev`
