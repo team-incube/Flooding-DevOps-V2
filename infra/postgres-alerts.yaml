@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: postgres-connection-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: postgres.connections
+      rules:
+        - alert: PostgreSQLConnectionsHigh
+          expr: |
+            sum(pg_stat_activity_count{datname="flooding"}) / pg_settings_max_connections * 100 > 80
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PostgreSQL 커넥션 사용률 80% 초과"
+            description: "현재 커넥션 수가 max_connections의 {{ $value | printf \"%.0f\" }}%입니다. HPA 스케일아웃 또는 트래픽 급증 여부를 확인하세요."
+
+        - alert: PostgreSQLConnectionsCritical
+          expr: |
+            sum(pg_stat_activity_count{datname="flooding"}) / pg_settings_max_connections * 100 > 90
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "PostgreSQL 커넥션 사용률 90% 초과 — 커넥션 고갈 임박"
+            description: "현재 커넥션 수가 max_connections의 {{ $value | printf \"%.0f\" }}%입니다. 즉시 HikariCP 풀 또는 HPA 설정을 점검하세요."
